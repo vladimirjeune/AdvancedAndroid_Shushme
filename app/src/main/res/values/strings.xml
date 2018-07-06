@@ -8,4 +8,6 @@
     <string name="settings_label">Settings</string>
     <string name="location_permissions">Location Permissions</string>
     <string name="enable_geofences">Enable Geofences</string>
+    <string name="tv_reqd_privacy_policy">Privacy Policy</string>
+    <string name="tv_link_to_privacy"><![CDATA[<a href=\'https://policies.google.com/privacy\'>Privacy Policy</a>]]></string>
 </resources>

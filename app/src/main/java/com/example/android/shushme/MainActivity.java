@@ -26,9 +26,13 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.Html;
+import android.text.Spanned;
+import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.view.View;
 import android.widget.CheckBox;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.android.shushme.provider.PlaceContract;
@@ -55,6 +59,7 @@ public class MainActivity extends AppCompatActivity implements
     // Member variables
     private PlaceListAdapter mAdapter;
     private RecyclerView mRecyclerView;
+    private TextView mTextViewPrivacyLink;
 
     /**
      * Called when the activity is starting
@@ -71,6 +76,12 @@ public class MainActivity extends AppCompatActivity implements
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         mAdapter = new PlaceListAdapter(this);
         mRecyclerView.setAdapter(mAdapter);
+
+        // Clickable link to privacy policy.  This and Powered By Google is necessary for the API if using Maps
+        mTextViewPrivacyLink = findViewById(R.id.tv_privacy_policy);
+        Spanned sp = Html.fromHtml(getString(R.string.tv_link_to_privacy));  // Needed for HTML
+        mTextViewPrivacyLink.setText(sp);
+        mTextViewPrivacyLink.setMovementMethod(LinkMovementMethod.getInstance());  // Needed to make link clickable
 
 
         // Build up the LocationServices API client
