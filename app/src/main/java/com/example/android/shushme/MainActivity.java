@@ -67,7 +67,6 @@ public class MainActivity extends AppCompatActivity implements
     private PlaceListAdapter mAdapter;
     private RecyclerView mRecyclerView;
     private GoogleApiClient mApiClient;
-    private PlaceBuffer mPlaceBuffer;
     private TextView mTextViewPrivacyLink;
 
     /**
@@ -84,7 +83,7 @@ public class MainActivity extends AppCompatActivity implements
         mRecyclerView = (RecyclerView) findViewById(R.id.places_list_recycler_view);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         // TODO (3) Modify the Adapter to take a PlaceBuffer in the constructor
-        mAdapter = new PlaceListAdapter(this, mPlaceBuffer);
+        mAdapter = new PlaceListAdapter(this, null);  // Will be assigned in Adapter
         mRecyclerView.setAdapter(mAdapter);
 
         // Clickable link to privacy policy.  This and Powered By Google is necessary for the API if using Maps
@@ -141,7 +140,6 @@ public class MainActivity extends AppCompatActivity implements
         pendingResults.setResultCallback(new ResultCallback<PlaceBuffer>() {
             @Override
             public void onResult(@NonNull PlaceBuffer places) {
-                mPlaceBuffer = places;
                 mAdapter.swapPlaces(places);
             }
         });
@@ -195,7 +193,6 @@ public class MainActivity extends AppCompatActivity implements
             return;
         }
         try {
-            refreshPlacesData();  // REFRESH DATA
 
             // Start a new Activity for the Place Picker API, this will trigger {@code #onActivityResult}
             // when a place is selected or with the user cancels.
@@ -237,6 +234,9 @@ public class MainActivity extends AppCompatActivity implements
             ContentValues contentValues = new ContentValues();
             contentValues.put(PlaceContract.PlaceEntry.COLUMN_PLACE_ID, placeID);
             getContentResolver().insert(PlaceContract.PlaceEntry.CONTENT_URI, contentValues);
+
+            refreshPlacesData();  // REFRESH DATA, after insert
+
         }
     }
 
