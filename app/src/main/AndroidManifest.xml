@@ -11,7 +11,8 @@
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="insert-your-api-key-here" />
+            android:value="AIzaSyCq6z25CBYOtsODVDtjjSsyIgiKZfjgZRs"
+            />
 
         <activity android:name="com.example.android.shushme.MainActivity">
             <intent-filter>
@@ -24,6 +25,8 @@
             android:name="com.example.android.shushme.provider.PlaceContentProvider"
             android:authorities="com.example.android.shushme"
             android:exported="false"/>
+
+        <receiver android:name=".GeofenceBroadcastReceiver" />
 
     </application>
 

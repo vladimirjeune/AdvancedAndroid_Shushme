@@ -18,6 +18,7 @@ package com.example.android.shushme;
 
 import android.content.ContentValues;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
@@ -31,6 +32,8 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
+import android.widget.Switch;
 import android.widget.Toast;
 
 import com.example.android.shushme.provider.PlaceContract;
@@ -64,6 +67,8 @@ public class MainActivity extends AppCompatActivity implements
     private PlaceListAdapter mAdapter;
     private RecyclerView mRecyclerView;
     private GoogleApiClient mClient;
+    private Geofencing mGeofencing;
+    private boolean mIsEnabled;
 
     /**
      * Called when the activity is starting
@@ -75,11 +80,34 @@ public class MainActivity extends AppCompatActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        mGeofencing = new Geofencing(this, mClient);
+
         // Set up the recycler view
         mRecyclerView = (RecyclerView) findViewById(R.id.places_list_recycler_view);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(this));
         mAdapter = new PlaceListAdapter(this, null);
         mRecyclerView.setAdapter(mAdapter);
+
+        Switch onOffSwitch = findViewById(R.id.enable_switch);
+        mIsEnabled = getPreferences(MODE_PRIVATE).getBoolean(getString(R.string.setting_enabled), false);
+        onOffSwitch.setChecked(mIsEnabled);
+
+        onOffSwitch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                SharedPreferences.Editor editor = getPreferences(MODE_PRIVATE).edit();
+                editor.putBoolean(getString(R.string.setting_enabled), isChecked);
+                mIsEnabled = isChecked;  // So that the var is in sync with SharedPreferences
+                editor.commit();
+
+                if (isChecked) {
+                    mGeofencing.registerAllGeofences();
+                } else {
+                    mGeofencing.unregisterAllGeofences();
+                }
+
+            }
+        });
 
         // TODO (9) Create a boolean SharedPreference to store the state of the "Enable Geofences" switch
         // and initialize the switch based on the value of that SharedPreference
@@ -178,6 +206,11 @@ public class MainActivity extends AppCompatActivity implements
             public void onResult(@NonNull PlaceBuffer places) {
                 mAdapter.swapPlaces(places);
                 // TODO (11) Call updateGeofenceList and registerAllGeofences if mIsEnabled is true
+                    mGeofencing.updateGeofencesList(places);  // Make sure all is up to data
+
+                if (mIsEnabled) {
+                    mGeofencing.registerAllGeofences();
+                }
             }
         });
     }
