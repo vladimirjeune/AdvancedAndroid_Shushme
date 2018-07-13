@@ -9,4 +9,11 @@
     <string name="location_permissions">Location Permissions</string>
     <string name="enable_geofences">Enable Geofences</string>
     <string name="privacy">http://www.google.com/policies/privacy</string>
+    <string name="volume_ringer">Image for volume</string>
+    <string name="volume_ringer_permissions">Ringer Permissions</string>
+    <string name="notify_geofence_transition">Geofence Indication</string>
+    <string name="notify_entering_geofence">Entering Known Geofence</string>
+    <string name="notify_exiting_geofence">Exiting Known Geofence</string>
+    <string name="channel_description">Notify about ringer state</string>
+    <string name="channel_name">ShushMe</string>
 </resources>

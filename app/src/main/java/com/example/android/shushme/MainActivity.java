@@ -16,13 +16,17 @@ package com.example.android.shushme;
 * limitations under the License.
 */
 
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
@@ -62,6 +66,7 @@ public class MainActivity extends AppCompatActivity implements
     public static final String TAG = MainActivity.class.getSimpleName();
     private static final int PERMISSIONS_REQUEST_FINE_LOCATION = 111;
     private static final int PLACE_PICKER_REQUEST = 1;
+    public static final String CHANNEL_ID = "shush_notification";
 
     // Member variables
     private PlaceListAdapter mAdapter;
@@ -115,6 +120,8 @@ public class MainActivity extends AppCompatActivity implements
                 .build();
 
         mGeofencing = new Geofencing(this, mClient);
+
+        createNotificationChannel();  // Needed for Android >= 8.  If you want to send Notifications
 
     }
 
@@ -247,13 +254,59 @@ public class MainActivity extends AppCompatActivity implements
         }
 
         //TODO (3) Initialize ringer permissions checkbox
+        // In case of Android N or later, we need to check if the permission was granted using
+        // isNotificationPolicyAccessGranted, otherwise we could assume that the permission is
+        // granted by default.
+        // Also since we don’t want the user to be unchecking this after permissions have been
+        // granted, it's best to disable the checkbox once everything seems to be set properly.
+        CheckBox ringerPermissions = findViewById(R.id.cb_volume_ringer_on_off);
+        NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N
+                && ! notificationManager.isNotificationPolicyAccessGranted()) {
+            ringerPermissions.setChecked(false);  // If > N and Access NOT granted
+        } else {
+            ringerPermissions.setChecked(true);  // Assume, already granted for < N, or already granted
+            ringerPermissions.setEnabled(false);
+        }
+
     }
 
     // TODO (2) Implement onRingerPermissionsClicked to launch ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS
+    public void onRingerPermissionsClicked(View view) {
+
+        Intent intent = new Intent(Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS);
+        startActivity(intent);
+    }
 
     public void onLocationPermissionClicked(View view) {
         ActivityCompat.requestPermissions(MainActivity.this,
                 new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
                 PERMISSIONS_REQUEST_FINE_LOCATION);
     }
+
+
+    /**
+     * CREATENOTIFICATIONCHANNEL - Because you must create the notification channel before posting
+     * any notifications on Android 8.0 and higher, you should execute this code as soon as your
+     * app starts. It's safe to call this repeatedly because creating an existing notification
+     * channel performs no operation.
+     */
+    private void createNotificationChannel() {
+        // Create the NotificationChannel, but only on API 26+ because
+        // the NotificationChannel class is new and not in the support library
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {   // Engage if greater than O
+            CharSequence name = getString(R.string.channel_name);
+            String description = getString(R.string.channel_description);
+            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
+            channel.setDescription(description);
+            // Register the channel with the system; you can't change the importance
+            // or other notification behaviors after this
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+        }
+    }
+
+
 }
